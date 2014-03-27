@@ -1,2 +1,4 @@
-service.subtitles.argenteam
-===========================
+service.subtitles.subscene
+==========================
+
+argenteam.net subtitle service plugin for XBMC
