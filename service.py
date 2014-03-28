@@ -89,8 +89,9 @@ def find_subtitles(content):
 def append_subtitle(items):
 
     items.sort(key=lambda x: x['rating'], reverse=True)
-
+    index = 0
     for item in items:
+        index += 1
         listitem = xbmcgui.ListItem(label=item['lang'],
                                 label2=item['filename'],
                                 iconImage=item['rating'],
@@ -101,7 +102,8 @@ def append_subtitle(items):
 
         ## below arguments are optional, it can be used to pass any info needed in download function
         ## anything after "action=download&" will be sent to addon once user clicks listed subtitle to downlaod
-        url = "plugin://%s/?action=download&link=%s&filename=%s&id=%s" % (__scriptid__,
+        url = "plugin://%s/?action=download&actionsortorder=%s&link=%s&filename=%s&id=%s" % (__scriptid__,
+                                                                    str(index).zfill(2),
                                                                     item['link'],
                                                                     item['filename'],
                                                                     item['id'])
