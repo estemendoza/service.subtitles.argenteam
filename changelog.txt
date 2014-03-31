@@ -1,3 +1,6 @@
+0.6
+- Added language on addon.xml
+
 0.5
 - Fixed encoding issue when doing a manual search with spaces
 - Fixed ordering issue when showing list of subtitles
