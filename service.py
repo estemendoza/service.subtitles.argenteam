@@ -222,7 +222,7 @@ def download(id, url, filename, search_string=""):
     ## Cleanup temp dir, we recomend you download/unzip your subs in temp folder and
     ## pass that to XBMC to copy and activate
     if xbmcvfs.exists(__temp__):
-        shutil.rmtree(__temp__)
+        shutil.rmtree(__temp__.encode(sys.getfilesystemencoding()))
     xbmcvfs.mkdirs(__temp__)
 
     filename = os.path.join(__temp__, filename + ".zip")
