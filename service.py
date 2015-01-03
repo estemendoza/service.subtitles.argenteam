@@ -24,7 +24,7 @@ __language__ = __addon__.getLocalizedString
 __cwd__ = xbmc.translatePath(__addon__.getAddonInfo('path')).decode("utf-8")
 __profile__ = xbmc.translatePath(__addon__.getAddonInfo('profile')).decode("utf-8")
 __resource__ = xbmc.translatePath(os.path.join(__cwd__, 'resources', 'lib')).decode("utf-8")
-__temp__ = xbmc.translatePath(os.path.join(__profile__, 'temp')).decode("utf-8")
+__temp__ = xbmc.translatePath(os.path.join(__profile__,'temp','')).decode("utf-8")
 
 sys.path.append(__resource__)
 
@@ -193,6 +193,7 @@ def search(item):
 def download(id, url, filename, search_string=""):
     subtitle_list = []
     exts = [".srt", ".sub", ".txt", ".smi", ".ssa", ".ass"]
+    
     ## Cleanup temp dir, we recomend you download/unzip your subs in temp folder and
     ## pass that to XBMC to copy and activate
     if xbmcvfs.exists(__temp__):
