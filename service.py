@@ -26,6 +26,7 @@ __profile__ = xbmc.translatePath(__addon__.getAddonInfo('profile')).decode("utf-
 __resource__ = xbmc.translatePath(os.path.join(__cwd__, 'resources', 'lib')).decode("utf-8")
 __temp__ = xbmc.translatePath(os.path.join(__profile__,'temp')).decode("utf-8")
 __temp__ = __temp__ + os.path.sep
+print __temp__
 
 sys.path.append(__resource__)
 
@@ -198,7 +199,7 @@ def download(id, url, filename, search_string=""):
     ## Cleanup temp dir, we recomend you download/unzip your subs in temp folder and
     ## pass that to XBMC to copy and activate
     if xbmcvfs.exists(__temp__):
-        shutil.rmtree(__temp__.encode(sys.getfilesystemencoding()))
+        shutil.rmtree(__temp__)
     xbmcvfs.mkdirs(__temp__)
 
     filename = os.path.join(__temp__, filename + ".zip")
@@ -212,11 +213,11 @@ def download(id, url, filename, search_string=""):
     xbmc.executebuiltin(('XBMC.Extract("%s","%s")' % (filename, __temp__,)).encode('utf-8'), True)
 
     for file in xbmcvfs.listdir(__temp__)[1]:
-        file = os.path.join(__temp__.encode(sys.getfilesystemencoding()), file)
+        file = os.path.join(__temp__, file)
         if os.path.splitext(file)[1] in exts:
             if search_string and string.find(string.lower(file), string.lower(search_string)) == -1:
                 continue
-            log(__name__, "=== returning subtitle file %s" % file.encode(sys.getfilesystemencoding()))
+            log(__name__, "=== returning subtitle file %s" % file)
             subtitle_list.append(file)
 
     return subtitle_list
