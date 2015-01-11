@@ -26,7 +26,6 @@ __profile__ = xbmc.translatePath(__addon__.getAddonInfo('profile')).decode("utf-
 __resource__ = xbmc.translatePath(os.path.join(__cwd__, 'resources', 'lib')).decode("utf-8")
 __temp__ = xbmc.translatePath(os.path.join(__profile__,'temp')).decode("utf-8")
 __temp__ = __temp__ + os.path.sep
-print __temp__
 
 sys.path.append(__resource__)
 
@@ -38,12 +37,6 @@ api_episode_url = "http://argenteam.net/api/v1/episode"
 api_movie_url = "http://argenteam.net/api/v1/movie"
 main_url = "http://www.argenteam.net/"
 
-# Seasons as strings for searching
-seasons = ["Specials", "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth"]
-seasons = seasons + ["Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth",
-                     "Eighteenth", "Nineteenth", "Twentieth"]
-seasons = seasons + ["Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth",
-                     "Twenty-seventh", "Twenty-eighth", "Twenty-ninth"]
 
 def append_subtitle(items):
 
