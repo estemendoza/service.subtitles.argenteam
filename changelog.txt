@@ -1,3 +1,7 @@
+0.9.2
+- Removed title when searching for an episode
+- PEP 8 compliant
+
 0.9
 - Migrated to use the Argenteam API
 - Make the hearing impared flag to appear on subtitles that are CC
