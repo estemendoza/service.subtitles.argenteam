@@ -40,11 +40,11 @@ __temp__ = __temp__ + os.path.sep
 
 sys.path.append(__resource__)
 
-api_search_url = "http://argenteam.net/api/v1/search"
-api_tvshow_url = "http://argenteam.net/api/v1/tvshow"
-api_episode_url = "http://argenteam.net/api/v1/episode"
-api_movie_url = "http://argenteam.net/api/v1/movie"
-main_url = "http://www.argenteam.net/"
+api_search_url = "https://argenteam.net/api/v1/search"
+api_tvshow_url = "https://argenteam.net/api/v1/tvshow"
+api_episode_url = "https://argenteam.net/api/v1/episode"
+api_movie_url = "https://argenteam.net/api/v1/movie"
+main_url = "https://argenteam.net/"
 
 
 def append_subtitle(items):
@@ -69,11 +69,15 @@ def append_subtitle(items):
         ## in download function
         ## anything after "action=download&" will be sent to addon
         ## once user clicks listed subtitle to downlaod
+
+        ## correción link de descarga de http://www. a https://
+        link_temp = item['link'].replace("http://www.", "https://", 1)
+
         url = ("plugin://%s/?action=download&actionsortorder=%s&link=%s"
                "&filename=%s&id=%s") % (
                   __scriptid__,
                   str(index).zfill(2),
-                  item['link'],
+                  link_temp,
                   item['filename'],
                   item['id']
               )
