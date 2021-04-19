@@ -4,7 +4,6 @@ import json
 import os
 import re
 import shutil
-import string
 import sys
 import unicodedata
 import urllib.error
@@ -172,9 +171,9 @@ def search_filename(filename, languages):
             flags=re.IGNORECASE
         )
         if match is not None:
-            tvshow = string.strip(title[:match.start('season') - 1])
-            season = string.lstrip(match.group('season'), '0')
-            episode = string.lstrip(match.group('episode'), '0')
+            tvshow = title[:match.start('season') - 1].strip()
+            season = match.group('season').lstrip('0')
+            episode = match.group('episode').lstrip('0')
             search_string = "%s S%#02dE%#02d" % (
                 tvshow,
                 int(season),
@@ -250,10 +249,7 @@ def download(id, url, filename, search_string=""):
     for file in xbmcvfs.listdir(__temp__)[1]:
         file = os.path.join(__temp__, file)
         if os.path.splitext(file)[1] in exts:
-            if search_string and string.find(
-                    string.lower(file),
-                    string.lower(search_string)
-            ) == -1:
+            if search_string and file.lower().find(search_string.lower()) == -1:
                 continue
             log(__name__, "=== returning subtitle file %s" % file)
             subtitle_list.append(file)
