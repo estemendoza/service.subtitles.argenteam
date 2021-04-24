@@ -1,3 +1,7 @@
+0.9.5.2
+- Changed Http queries to https protocol (thanks kralizeck!)
+- Removed kodisix unnecessary dependency
+
 0.9.5.1
 - Make it compatible with Kodi 19
 

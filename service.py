@@ -13,9 +13,13 @@ import urllib.parse
 import urllib.request
 import urllib.request
 import zipfile
+import xbmc
+import xbmcaddon
+import xbmcgui
+import xbmcplugin
+import xbmcvfs
 
 from ArgenteamUtilities import log, geturl
-from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
 
 __addon__ = xbmcaddon.Addon()
 __author__ = __addon__.getAddonInfo('author')

@@ -4,7 +4,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from kodi_six import xbmc
+import xbmc
 
 
 def log(module, msg):
