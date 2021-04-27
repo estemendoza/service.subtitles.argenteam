@@ -1,19 +1,25 @@
 # -*- coding: utf-8 -*-
 
+import json
 import os
+import re
+import shutil
 import sys
+import unicodedata
+import urllib.error
+import urllib.error
+import urllib.parse
+import urllib.parse
+import urllib.request
+import urllib.request
+import zipfile
 import xbmc
-import urllib
-import urllib2
-import xbmcvfs
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
-import shutil
-import unicodedata
-import re
-import string
-import json
+import xbmcvfs
+
+from ArgenteamUtilities import log, geturl
 
 __addon__ = xbmcaddon.Addon()
 __author__ = __addon__.getAddonInfo('author')
@@ -22,46 +28,43 @@ __scriptname__ = __addon__.getAddonInfo('name')
 __version__ = __addon__.getAddonInfo('version')
 __language__ = __addon__.getLocalizedString
 
-__cwd__ = xbmc.translatePath(
+__cwd__ = xbmcvfs.translatePath(
     __addon__.getAddonInfo('path')
-).decode("utf-8")
-__profile__ = xbmc.translatePath(
+)
+__profile__ = xbmcvfs.translatePath(
     __addon__.getAddonInfo('profile')
-).decode("utf-8")
-__resource__ = xbmc.translatePath(
+)
+__resource__ = xbmcvfs.translatePath(
     os.path.join(__cwd__, 'resources', 'lib')
-).decode("utf-8")
-__temp__ = xbmc.translatePath(
+)
+__temp__ = xbmcvfs.translatePath(
     os.path.join(__profile__, 'temp')
-).decode("utf-8")
+)
 __temp__ = __temp__ + os.path.sep
 
 sys.path.append(__resource__)
 
-from ArgenteamUtilities import log, geturl
-
-api_search_url = "http://argenteam.net/api/v1/search"
-api_tvshow_url = "http://argenteam.net/api/v1/tvshow"
-api_episode_url = "http://argenteam.net/api/v1/episode"
-api_movie_url = "http://argenteam.net/api/v1/movie"
-main_url = "http://www.argenteam.net/"
+api_search_url = "https://argenteam.net/api/v1/search"
+api_tvshow_url = "https://argenteam.net/api/v1/tvshow"
+api_episode_url = "https://argenteam.net/api/v1/episode"
+api_movie_url = "https://argenteam.net/api/v1/movie"
+main_url = "https://argenteam.net/"
 
 
 def append_subtitle(items):
-
     items.sort(key=lambda x: x['rating'], reverse=True)
     index = 0
     for item in items:
         index += 1
-        listitem = xbmcgui.ListItem(
+        list_item = xbmcgui.ListItem(
             label=item['lang'],
-            label2=item['filename'],
-            iconImage=item['rating'],
-            thumbnailImage=item['image']
+            label2=item['filename']
         )
+        list_item.setArt({'icon': item['rating']})
+        list_item.setArt({'thumb': item['image']})
 
-        #listitem.setProperty("sync",  'true' if item["sync"] else 'false')
-        listitem.setProperty(
+        # listitem.setProperty("sync",  'true' if item["sync"] else 'false')
+        list_item.setProperty(
             "hearing_imp",
             'true' if item["hearing_imp"] else 'false'
         )
@@ -70,21 +73,25 @@ def append_subtitle(items):
         ## in download function
         ## anything after "action=download&" will be sent to addon
         ## once user clicks listed subtitle to downlaod
+
+        ## correción link de descarga de http://www. a https://
+        link_temp = item['link'].replace("http://www.", "https://", 1)
+
         url = ("plugin://%s/?action=download&actionsortorder=%s&link=%s"
                "&filename=%s&id=%s") % (
-            __scriptid__,
-            str(index).zfill(2),
-            item['link'],
-            item['filename'],
-            item['id']
-        )
+                  __scriptid__,
+                  str(index).zfill(2),
+                  link_temp,
+                  item['filename'],
+                  item['id']
+              )
 
         ## add it to list, this can be done as many times as needed
         ## for all subtitles found
         xbmcplugin.addDirectoryItem(
             handle=int(sys.argv[1]),
             url=url,
-            listitem=listitem,
+            listitem=list_item,
             isFolder=False
         )
 
@@ -97,7 +104,7 @@ def search_movie(movie_id):
 
 
 def search_tvshow(result):
-    #log(__name__, "Search tvshow = %s" % tvshow)
+    # log(__name__, "Search tvshow = %s" % tvshow)
 
     subs = []
 
@@ -127,7 +134,7 @@ def search_episode(episode_id):
 def search_common(content):
     if content is not None:
         log(__name__, "Resultados encontrados...")
-        #object_subtitles = find_subtitles(content)
+        # object_subtitles = find_subtitles(content)
         items = []
         result = json.loads(content)
 
@@ -136,7 +143,7 @@ def search_common(content):
                 for subtitle in release['subtitles']:
                     item = {}
                     item['lang'] = "Spanish"
-                    item['filename'] = urllib.unquote_plus(
+                    item['filename'] = urllib.parse.unquote_plus(
                         subtitle['uri'].split("/")[-1]
                     )
                     item['rating'] = str(subtitle['count'])
@@ -144,7 +151,7 @@ def search_common(content):
                     item['id'] = subtitle['uri'].split("/")[-2]
                     item['link'] = subtitle['uri']
 
-                    #Check for Closed Caption
+                    # Check for Closed Caption
                     if "-CC" in item['filename']:
                         item['hearing_imp'] = True
                     else:
@@ -172,9 +179,9 @@ def search_filename(filename, languages):
             flags=re.IGNORECASE
         )
         if match is not None:
-            tvshow = string.strip(title[:match.start('season')-1])
-            season = string.lstrip(match.group('season'), '0')
-            episode = string.lstrip(match.group('episode'), '0')
+            tvshow = title[:match.start('season') - 1].strip()
+            season = match.group('season').lstrip('0')
+            episode = match.group('episode').lstrip('0')
             search_string = "%s S%#02dE%#02d" % (
                 tvshow,
                 int(season),
@@ -186,7 +193,7 @@ def search_filename(filename, languages):
 
 
 def search_argenteam_api(search_string):
-    url = api_search_url + "?q=" + urllib.quote_plus(search_string)
+    url = api_search_url + "?q=" + urllib.parse.quote_plus(search_string)
     content, response_url = geturl(url)
     response = json.loads(content)
     subs = []
@@ -207,10 +214,10 @@ def search(item):
         item,
         filename,
         __version__)
-    )
+        )
 
     if item['mansearch']:
-        search_string = urllib.unquote(item['mansearchstr'])
+        search_string = urllib.parse.unquote(item['mansearchstr'])
         search_argenteam_api(search_string)
     elif item['tvshow']:
         search_string = "%s S%#02dE%#02d" % (
@@ -237,25 +244,20 @@ def download(id, url, filename, search_string=""):
     xbmcvfs.mkdirs(__temp__)
 
     filename = os.path.join(__temp__, filename + ".zip")
-    req = urllib2.Request(url, headers={"User-Agent": "Kodi-Addon"})
-    sub = urllib2.urlopen(req).read()
+    req = urllib.request.Request(url, headers={"User-Agent": "Kodi-Addon"})
+    sub = urllib.request.urlopen(req).read()
     with open(filename, "wb") as subFile:
         subFile.write(sub)
     subFile.close()
 
     xbmc.sleep(500)
-    xbmc.executebuiltin(
-        (
-            'XBMC.Extract("%s","%s")' % (filename, __temp__,)
-        ).encode('utf-8'), True)
+    with zipfile.ZipFile(filename, 'r') as zip_ref:
+        zip_ref.extractall(__temp__)
 
     for file in xbmcvfs.listdir(__temp__)[1]:
         file = os.path.join(__temp__, file)
         if os.path.splitext(file)[1] in exts:
-            if search_string and string.find(
-                string.lower(file),
-                string.lower(search_string)
-            ) == -1:
+            if search_string and file.lower().find(search_string.lower()) == -1:
                 continue
             log(__name__, "=== returning subtitle file %s" % file)
             subtitle_list.append(file)
@@ -263,10 +265,10 @@ def download(id, url, filename, search_string=""):
     return subtitle_list
 
 
-def normalizeString(str):
+def normalizeString(str_to_normalize):
     return unicodedata.normalize(
-        'NFKD', unicode(unicode(str, 'utf-8'))
-    ).encode('ascii', 'ignore')
+        'NFKD', str_to_normalize
+    )
 
 
 def get_params():
@@ -303,17 +305,17 @@ if params['action'] == 'search' or params['action'] == 'manualsearch':
     item['title'] = normalizeString(
         xbmc.getInfoLabel("VideoPlayer.OriginalTitle")
     )
-    item['file_original_path'] = urllib.unquote(
-        xbmc.Player().getPlayingFile().decode('utf-8')
+    item['file_original_path'] = urllib.parse.unquote(
+        xbmc.Player().getPlayingFile()
     )
     item['3let_language'] = []
 
     if 'searchstring' in params:
         item['mansearch'] = True
         item['mansearchstr'] = params['searchstring']
-        print params['searchstring']
+        print(params['searchstring'])
 
-    for lang in urllib.unquote(params['languages']).decode('utf-8').split(","):
+    for lang in urllib.parse.unquote(params['languages']).split(","):
         item['3let_language'].append(
             xbmc.convertLanguage(lang, xbmc.ISO_639_2)
         )
@@ -347,7 +349,7 @@ elif params['action'] == 'download':
     if 'find' in params:
         subs = download(params["link"], params["find"])
     else:
-        subs = download(params["id"],params["link"], params["filename"])
+        subs = download(params["id"], params["link"], params["filename"])
     ## we can return more than one subtitle for multi CD versions,
     ## for now we are still working out how to handle that
     ## in XBMC core
